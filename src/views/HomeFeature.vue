@@ -1,7 +1,7 @@
 <template>
     <div class="featur">
         <span>本地流行</span>
-        <a href="">
+        <a href="javascript:;">
             <img src="~assets/images/home/01055378.jpg" alt="">
         </a>
     </div>
