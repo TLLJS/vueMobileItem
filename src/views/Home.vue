@@ -12,16 +12,17 @@
       @pullingUp="loadMore"
     >
       <!-- 轮播图组件 -->
-      <home-swiper :banners="banners" class="banner"></home-swiper>
+      <home-swiper :banners="banners" class="banner" @SwiperImageLoad="SwiperImageLoad"></home-swiper>
       <!-- 推荐组件 -->
       <home-recommend :recommends="recommends"></home-recommend>
       <!-- 本地流行组件 -->
       <home-feature></home-feature>
       <!-- 商品列表-->
       <tab-control
+        ref="tabControl"
         :titles="['流行', '新款', '精选']"
-        class="tab-control"
         @navigation="handelNavigation"
+        :class="{fixed:isTabFixed}"
       ></tab-control>
       <good-list :goods="goods[currenttime].list"></good-list>
     </scroll>
@@ -37,6 +38,7 @@ import TabControl from "components/content/TabControl";
 import GoodList from "components/content/goods/GoodsList";
 import Scroll from "components/common/bscroll/Scroll";
 import BackTop from "components/content/backtop/BackTop";
+import {debounce} from 'common/ulits/dehouse'
 
 import HomeSwiper from "views/HomeSwiper";
 import HomeRecommend from "views/HomeRecommend";
@@ -65,10 +67,16 @@ export default {
           list: [],
         },
       },
+      //记录当前滚动的距离，当跳转到其他页面再跳回来时可以显示跳转时的位置
+      saveY:0,
       // 根据handelNavigation(index)控制商品数据中type的类型
       currenttime: "pop",
       // 控制返回顶部按钮的显示与隐藏
       isShow: false,
+    //  tabControl组件滚动的距离
+      tabControlOffsetTop:0,
+    //  判断tabControl组件是否需要吸顶
+      isTabFixed:false
     };
   },
   created() {
@@ -79,7 +87,28 @@ export default {
     this.getGoodsDate("new");
     this.getGoodsDate("sell");
   },
+  mounted() {
+    const refresh=debounce(this.$refs.scrolls.refresh,1000)
+    //  监听GoodlistItem中图片加载完的事件
+    this.$bus.$on('itemImageLoad',()=>{
+      refresh()
+    })
+  },
+  //返回该组件时触发
+  activated() {
+    this.$refs.scrolls.scrollTo(0,this.saveY,0)
+    this.$refs.scrolls.refresh()
+  },
+  //离开该组件时触发
+  deactivated() {
+    this.saveY=this.$refs.scrolls.scroll.y
+  },
   methods: {
+    //监听子组件HomeSwiper传递过的事件
+    SwiperImageLoad(){
+      //this.$refs.tabControl.$el获取tabControl组件中的标签
+      this.tabControlOffsetTop=this.$refs.tabControl.$el.offsetTop
+    },
     // 获取首页数据
     async getHomeDate() {
       // 请求首页数据
@@ -120,7 +149,9 @@ export default {
     // 获取当前的滚动的位置
     handelScroll(position) {
       // 当滚动位置大于1000时显示滚动按钮
-      this.isShow = -position.y > 1000;
+      this.isShow = (-position.y )> 1000;
+    //  决定tabcontrol组件是否吸顶
+      this.isTabFixed= (-position.y)>this.tabControlOffsetTop
     },
     // 上拉加载更多
     loadMore() {
@@ -136,6 +167,7 @@ export default {
     TabControl,
     GoodList,
     BackTop,
+    Scroll
   },
 };
 </script>
@@ -153,16 +185,17 @@ export default {
   color: #fff;
   z-index: 99;
 }
-.tab-control {
-  position: sticky;
-  top: 44px;
-  background-color: #fff;
-}
 .content {
   overflow: hidden;
   position: absolute;
   top: 44px;
   bottom: 49px;
+  left: 0;
+  right: 0;
+}
+.fixed{
+  position: fixed;
+  top: 44px;
   left: 0;
   right: 0;
 }

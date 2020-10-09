@@ -31,14 +31,20 @@ export default {
             pullUpLoad:this.pullingLoad
         })
         // 监听滚动的位置
-        this.scroll.on('scroll',(position)=>{
-            this.$emit('scroll',position)
+        //判断是否需要滚动
+        if (this.probeType===2||this.probeType===3){
+            this.scroll.on('scroll',(position)=>{
+                this.$emit('scroll',position)
 
-        })
+            })
+        }
         // 监听上拉事件
-        this.scroll.on('pullingUp',()=>{
-            this.$emit('pullingUp')
-        })
+        //判断是否需要监听上拉加载更多
+        if (this.pullingLoad){
+            this.scroll.on('pullingUp',()=>{
+                this.$emit('pullingUp')
+            })
+        }
     },
     methods:{
         scrollTos(x,y,time=300){
@@ -47,6 +53,10 @@ export default {
         // 启用多次上拉加载
         finishPullUp(){
             this.scroll.finishPullUp()
+        },
+        //图片刷新
+        refresh(){
+            this.scroll&& this.scroll.refresh()
         }
     }
 }

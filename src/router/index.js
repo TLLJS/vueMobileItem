@@ -4,6 +4,7 @@ const Home=()=>import ('views/Home.vue')
 const Cate=()=>import('views/Cate.vue')
 const Categry=()=>import('views/Categry.vue')
 const Prifile=()=>import('views/Profile.vue')
+const Detail=()=>import('views/Detail.vue')
 Vue.use(VueRouter)
 
 const routes = [
@@ -26,6 +27,10 @@ const routes = [
   {
     path:'/profile',
     component:Prifile
+  },
+  {
+    path:'/detail/:iid',
+    component:Detail
   }
 ]
 
